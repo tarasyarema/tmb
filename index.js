@@ -1,6 +1,5 @@
 const express = require('express');
 const request = require('request');
-const Datastore = require('nedb');
 const app = express();
 require('dotenv').load();
 
@@ -8,7 +7,6 @@ const auth = {
     app_id: typeof(process.env.APP_ID) == 'string' ? process.env.APP_ID : null,
     app_key: typeof(process.env.APP_KEY) == 'string' ? process.env.APP_KEY : null,
 };
-
 
 function format_url (info) {
     if (typeof(info.num) != 'number' || typeof(info.id) != 'number') {
@@ -38,10 +36,12 @@ app.get('/api/:id/:num', (req, res) => {
         process.exit(1);
     }
 
-
     request.get({ uri: url, qs: auth }, 
         (error, response, body) => {
-            if (error) return error;
+            if (error) {
+                console.log(error);
+                return error;
+            }
 
             let data = JSON.parse(body).data.ibus[0];
             let time_s = data['t-in-s'];
@@ -52,9 +52,9 @@ app.get('/api/:id/:num', (req, res) => {
                 seg: time_s - 60 * time_m
             }; 
 
-            console.log('  ▷ Response sent.')
-            res.send(`<h2> Time for ${info.num}</h2>\n${time_left.min} min ${time_left.seg} s.`);
+            console.log('  ▷ JSON response sent.')
+            res.json(time_left);
     });
 });
 
-app.listen(3000);
+app.listen(process.env.PORT);
