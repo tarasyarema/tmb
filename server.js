@@ -16,6 +16,18 @@ function format_url (info) {
     }
 }
 
+app.get('/', (req, res) => {
+    console.log('GET /');
+    console.log('  ▷  Redirected to github page.')
+    res.redirect('https://github.com/tarasyarema/tmb');
+});
+
+app.get('/api', (req, res) => {
+    console.log('GET /api');
+    console.log('  ▷  Redirected to github page.')
+    res.redirect('https://github.com/tarasyarema/tmb');
+});
+
 app.get('/api/:id/:num', (req, res) => {    
     let info = {
         num: parseInt(req.params.num),
