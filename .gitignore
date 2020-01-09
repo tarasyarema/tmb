@@ -1,3 +1,4 @@
 .env
 _tmb_static/
 .vscode/
+*.exe

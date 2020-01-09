@@ -10,7 +10,7 @@ var base_url string
 var api_creds Creds
 
 func loadEnv() {
-	base_url = os.Getenv("TMB_URL")
+	base_url = "https://api.tmb.cat/v1"
 	api_creds.AppId = os.Getenv("TMB_ID")
 	api_creds.AppKey = os.Getenv("TMB_KEY")
 
