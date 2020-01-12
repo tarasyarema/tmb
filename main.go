@@ -7,13 +7,8 @@ func main() {
 
 	r := gin.Default()
 
-	r.GET("/", func (c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "OK",
-		})
-	})
+	r.GET("/pool", getTimesStopsPool)
+	r.GET("/routines", getTimesStopsRoutines)
 
-	r.GET("/lbs", getTimesStops)
-	
 	r.Run()
 }

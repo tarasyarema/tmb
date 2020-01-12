@@ -1,24 +1,34 @@
 package main
 
 import (
-	_ "fmt"
-	"strings"
-	"strconv"
+	"bytes"
 	_ "encoding/json"
+	_ "fmt"
+	"log"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/gin-gonic/gin"
 )
 
-/*
- *
- * Get remaining times
- *
- */
+var (
+	buf    bytes.Buffer
+	logger = log.New(&buf, "INFO: ", log.Lshortfile)
 
-func getTimesStops(c *gin.Context) {
+	infof = func(info string) {
+		logger.Output(2, info)
+	}
+)
+
+func getTimesStopsPool(c *gin.Context) {
+	defer timeTrack(time.Now(), "getTimesStopsPool")
+
 	data := strings.Split(c.Query("data"), ",")
-	data_len := len(data)
+	dataLen := len(data)
 
-	if data_len % 2 != 0 {
+	if dataLen%2 != 0 {
 		c.JSON(400, gin.H{
 			"message": "missing data in the query string",
 		})
@@ -26,17 +36,72 @@ func getTimesStops(c *gin.Context) {
 		return
 	}
 
-	pair_data := make([]Pair, data_len / 2)
+	pairData := make([]Pair, dataLen/2)
 
-	for i := 0; i < data_len; i += 2 {
-		pair_data[i / 2].Line, _ = strconv.Atoi(data[i])
-		pair_data[i / 2].Stop, _ = strconv.Atoi(data[i + 1])
+	for i := 0; i < dataLen; i += 2 {
+		pairData[i/2].Line, _ = strconv.Atoi(data[i])
+		pairData[i/2].Stop, _ = strconv.Atoi(data[i+1])
 	}
 
-	time_data := fetchLineStopPairs(pair_data)
+	ret := gin.H{"message": "OK"}
+	code := 200
 
-	c.JSON(200, gin.H{
-		"message": "OK",
-		"data": time_data,
-	})
+	timeData, err := fetchLineStopPairs(pairData)
+
+	if err != nil {
+		code = 400
+		ret["message"] = err
+
+		c.JSON(code, ret)
+		return
+	}
+
+	if timeData != nil {
+		ret["data"] = timeData
+	}
+
+	c.JSON(code, ret)
+}
+
+func getTimesStopsRoutines(c *gin.Context) {
+	defer timeTrack(time.Now(), "getTimesStopsRoutines")
+
+	data := strings.Split(c.Query("data"), ",")
+	dataLen := len(data)
+
+	if dataLen%2 != 0 {
+		c.JSON(400, gin.H{
+			"message": "missing data in the query string",
+		})
+
+		return
+	}
+
+	pairData := make([]Pair, dataLen/2)
+
+	for i := 0; i < dataLen; i += 2 {
+		pairData[i/2].Line, _ = strconv.Atoi(data[i])
+		pairData[i/2].Stop, _ = strconv.Atoi(data[i+1])
+	}
+
+	dataLen /= 2
+	timeData := make([]Times, dataLen)
+
+	var wg sync.WaitGroup
+	wg.Add(dataLen)
+
+	for i := 0; i < dataLen; i++ {
+		go fetchLineStopPairAsync(&wg, i, pairData[i], &timeData[i])
+	}
+
+	wg.Wait()
+
+	ret := gin.H{"message": "OK"}
+	code := 200
+
+	if timeData != nil {
+		ret["data"] = timeData
+	}
+
+	c.JSON(code, ret)
 }

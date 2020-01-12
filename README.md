@@ -38,7 +38,17 @@ Setup docker, *bla, bla, ...*
 
 ## Documentation
 
-### `GET /lbs`
+### `GET /[pool|routines]`
+
+There are two options:
+
+- `/pool`
+Creates a pool of async requests using [requests](github.com/jochasinga/requests).
+
+- `/routines`
+Create a goroutine for every pair and makes an individual async request (using the same library [requests](github.com/jochasinga/requests)) for each one, in their own routine.
+
+Both take the same query params and the responses are identical.
 
 #### Query params
 
@@ -51,7 +61,7 @@ String of comma separated integers. The format of a pair is `bus_line,stop_id`.
 ##### Request
 
 ```bash
-GET /lbs?data=54,208
+GET /lbs?data=54,208,13,37
 ```
 
 ##### Response
@@ -62,14 +72,25 @@ HTTP/1.1 200 OK
 {
   "data": [
     {
-      "routeId": "0541",
-      "t-in-s": 305,
-      "TimeM": 0
+      "Time": 23,
+      "Meta": {
+        "Line": 54,
+        "Stop": 208
+      }
+    },
+    {
+      "Time": 420,
+      "Meta": {
+        "Line": 13,
+        "Stop": 37
+      }
     }
   ],
   "message": "OK"
 }
 ```
+
+*The time (`data.*.Time`) is given in seconds.*
 
 ## Tests
 
