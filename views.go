@@ -25,6 +25,8 @@ var (
 func getTimesStopsPool(c *gin.Context) {
 	defer timeTrack(time.Now(), "getTimesStopsPool")
 
+	_t := time.Now()
+
 	data := strings.Split(c.Query("data"), ",")
 	dataLen := len(data)
 
@@ -39,8 +41,8 @@ func getTimesStopsPool(c *gin.Context) {
 	pairData := make([]Pair, dataLen/2)
 
 	for i := 0; i < dataLen; i += 2 {
-		pairData[i/2].Line, _ = strconv.Atoi(data[i])
-		pairData[i/2].Stop, _ = strconv.Atoi(data[i+1])
+		pairData[i/2].Line = data[i]
+		pairData[i/2].Stop = data[i+1]
 	}
 
 	ret := gin.H{"message": "OK"}
@@ -51,6 +53,7 @@ func getTimesStopsPool(c *gin.Context) {
 	if err != nil {
 		code = 400
 		ret["message"] = err
+		ret["elapsed"] = time.Since(_t).Milliseconds()
 
 		c.JSON(code, ret)
 		return
@@ -60,11 +63,15 @@ func getTimesStopsPool(c *gin.Context) {
 		ret["data"] = timeData
 	}
 
+	ret["elapsed"] = time.Since(_t).Milliseconds()
+
 	c.JSON(code, ret)
 }
 
 func getTimesStopsRoutines(c *gin.Context) {
 	defer timeTrack(time.Now(), "getTimesStopsRoutines")
+
+	_t := time.Now()
 
 	data := strings.Split(c.Query("data"), ",")
 	dataLen := len(data)
@@ -80,18 +87,24 @@ func getTimesStopsRoutines(c *gin.Context) {
 	pairData := make([]Pair, dataLen/2)
 
 	for i := 0; i < dataLen; i += 2 {
-		pairData[i/2].Line, _ = strconv.Atoi(data[i])
-		pairData[i/2].Stop, _ = strconv.Atoi(data[i+1])
+		pairData[i/2].Line = data[i]
+		pairData[i/2].Stop = data[i+1]
 	}
 
 	dataLen /= 2
 	timeData := make([]Times, dataLen)
 
+	isSync, _ := strconv.ParseBool(c.DefaultQuery("sync", "false"))
+
 	var wg sync.WaitGroup
 	wg.Add(dataLen)
 
 	for i := 0; i < dataLen; i++ {
-		go fetchLineStopPairAsync(&wg, i, pairData[i], &timeData[i])
+		if isSync {
+			go fetchLineStopPairSync(&wg, i, pairData[i], &timeData[i])
+		} else {
+			go fetchLineStopPairAsync(&wg, i, pairData[i], &timeData[i])
+		}
 	}
 
 	wg.Wait()
@@ -102,6 +115,8 @@ func getTimesStopsRoutines(c *gin.Context) {
 	if timeData != nil {
 		ret["data"] = timeData
 	}
+
+	ret["elapsed"] = time.Since(_t).Milliseconds()
 
 	c.JSON(code, ret)
 }
