@@ -20,14 +20,15 @@ type IBusData struct {
 
 // Times ...
 type Times struct {
-	Time int
-	Meta Pair
+	Time    int   `json:"time"`
+	Meta    Pair  `json:"meta"`
+	Elapsed int64 `json:"elapsed"`
 }
 
 // Pair ...
 type Pair struct {
-	Line int
-	Stop int
+	Line string `json:"line"`
+	Stop string `json:"stop"`
 }
 
 // Creds ...
