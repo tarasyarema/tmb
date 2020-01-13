@@ -99,7 +99,7 @@ GET /routines?data=D40,1554,H8,1554,27,1554 HTTP/1.1
 }
 ```
 
-*The time (`data.*.Time`) is given in seconds.*
+*The time (`data.*.time`) parameter of the response JSON is given in seconds.*
 
 ## Tests
 
