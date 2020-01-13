@@ -64,35 +64,38 @@ Defines if every request to the TMB api is made via `requests.GetAsync` or `requ
 
 #### Example
 
-##### Request
-
 ```bash
-GET /routines?data=54,208,13,37&sync=true
-```
-
-##### Response
-
-```bash
-HTTP/1.1 200 OK
+GET /routines?data=D40,1554,H8,1554,27,1554 HTTP/1.1
 
 {
-  "data": [
-    {
-      "Time": 23,
-      "Meta": {
-        "Line": 54,
-        "Stop": 208
+   "data": [
+      {
+         "time": 427,
+         "meta": {
+            "line": "D40",
+            "stop": "1554"
+         },
+         "elapsed": 88
+      },
+      {
+         "time": 10,
+         "meta": {
+            "line": "H8",
+            "stop": "1554"
+         },
+         "elapsed": 447
+      },
+      {
+         "time": 30,
+         "meta": {
+            "line": "27",
+            "stop": "1554"
+         },
+         "elapsed": 80
       }
-    },
-    {
-      "Time": 420,
-      "Meta": {
-        "Line": 13,
-        "Stop": 37
-      }
-    }
-  ],
-  "message": "OK"
+   ],
+   "elapsed": 447,
+   "message": "OK"
 }
 ```
 
