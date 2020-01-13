@@ -46,7 +46,7 @@ There are two options:
 Creates a pool of async requests using [requests](https://github.com/jochasinga/requests).
 
 - `/routines`
-Create a goroutine for every pair and makes an individual async request (using the same library [requests](https://github.com/jochasinga/requests)) for each one, in their own routine.
+Create a goroutine for every pair and makes an individual async or sync request (using the same library [requests](https://github.com/jochasinga/requests)) for each one, in their own routine.
 
 Both take the same query params and the responses are identical.
 
