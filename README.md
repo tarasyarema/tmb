@@ -101,6 +101,8 @@ GET /routines?data=D40,1554,H8,1554,27,1554 HTTP/1.1
 
 *The time (`data.*.time`) parameter of the response JSON is given in seconds.*
 
+*The elapsed times (`data.*.elapsed` and `data.elapsed`) parametere of the response JSON is given in miliseconds.*
+
 ## Tests
 
 ***Suerte en la vida**, xd*
