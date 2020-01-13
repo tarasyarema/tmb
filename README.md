@@ -23,7 +23,7 @@ GIN_MODE=debug|release
 
 Two options:
 
-1. `go build` and then run the executable `./tmb.exe`
+1. `go build` and then run the builded executable.
 2. `go run .`
 
 By default the port is `8000` or `8080`, depending on the os. Just look at the fucking terminal.
