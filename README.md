@@ -52,16 +52,22 @@ Both take the same query params and the responses are identical.
 
 #### Query params
 
-#### data
+#### `data`
 
 String of comma separated integers. The format of a pair is `bus_line,stop_id`.
+
+#### `sync` (only used with `/routines`)
+
+Boolean (`true` or `false`). Default `false`.
+
+Defines if every request to the TMB api is made via `requests.GetAsync` or `requests.Get`. 
 
 #### Example
 
 ##### Request
 
 ```bash
-GET /lbs?data=54,208,13,37
+GET /routines?data=54,208,13,37&sync=true
 ```
 
 ##### Response
