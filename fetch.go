@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 	"regexp"
-	"strconv"
 	"sync"
+	"time"
 
 	"github.com/jochasinga/requests"
 )
@@ -18,7 +18,7 @@ func addAuthQuery(r *requests.Request) {
 }
 
 func fetchLineStopPairs(ps []Pair) ([]Times, error) {
-	pairReg := regexp.MustCompile(`\/(\d+)`)
+	pairReg := regexp.MustCompile(`\/`)
 
 	var data []Times
 
@@ -49,12 +49,22 @@ func fetchLineStopPairs(ps []Pair) ([]Times, error) {
 		var tmp APIResponse
 		json.Unmarshal(res.Bytes(), &tmp)
 
-		tmpPair := pairReg.FindAllString(res.Response.Request.URL.Path, -1)
+		tmpPair := pairReg.Split(res.Response.Request.URL.Path, -1)
 
-		tmpLine, _ := strconv.Atoi(tmpPair[0][1:])
-		tmpStop, _ := strconv.Atoi(tmpPair[1][1:])
+		var (
+			tmpLine string
+			tmpStop string
+		)
 
-		tmpTimes := Times{0, Pair{tmpLine, tmpStop}}
+		if len(tmpPair) > 5 {
+			tmpLine = tmpPair[4]
+			tmpStop = tmpPair[6]
+		} else {
+			tmpLine = "?line"
+			tmpStop = "?stop"
+		}
+
+		tmpTimes := Times{0, Pair{tmpLine, tmpStop}, 0.0}
 
 		if len(tmp.Data.IBus) > 0 {
 			tmpTimes.Time = tmp.Data.IBus[0].TimeS
@@ -72,12 +82,12 @@ func fetchLineStopPairs(ps []Pair) ([]Times, error) {
 }
 
 func fetchLineStopPairAsync(wg *sync.WaitGroup, id int, p Pair, d *Times) {
-	defer wg.Done()
+	defer deferDone(wg, time.Now(), id, d)
 
 	var empty Times
 	url := fmt.Sprintf("%v/ibus/lines/%v/stops/%v", baseURL, p.Line, p.Stop)
 
-	rc, err := requests.GetAsync(url)
+	rc, err := requests.GetAsync(url, addAuthQuery)
 
 	if err != nil {
 		log.Println(err)
@@ -89,6 +99,31 @@ func fetchLineStopPairAsync(wg *sync.WaitGroup, id int, p Pair, d *Times) {
 	res := <-rc
 
 	if res.Error != nil {
+		log.Println(err)
+		d = &empty
+
+		return
+	}
+
+	var tmp APIResponse
+	d.Meta = p
+
+	json.Unmarshal(res.Bytes(), &tmp)
+
+	if len(tmp.Data.IBus) > 0 {
+		d.Time = tmp.Data.IBus[0].TimeS
+	}
+}
+
+func fetchLineStopPairSync(wg *sync.WaitGroup, id int, p Pair, d *Times) {
+	defer deferDone(wg, time.Now(), id, d)
+
+	var empty Times
+	url := fmt.Sprintf("%v/ibus/lines/%v/stops/%v", baseURL, p.Line, p.Stop)
+
+	res, err := requests.Get(url, addAuthQuery)
+
+	if err != nil {
 		log.Println(err)
 		d = &empty
 
