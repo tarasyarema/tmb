@@ -1,6 +1,9 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"fmt"
+	"github.com/gin-gonic/gin"
+)
 
 func main() {
 	loadEnv()
@@ -10,5 +13,7 @@ func main() {
 	r.GET("/pool", getTimesStopsPool)
 	r.GET("/routines", getTimesStopsRoutines)
 
-	r.Run()
+	portStr := fmt.Sprintf(":%v", port)
+
+	r.Run(portStr)
 }

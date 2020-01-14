@@ -10,31 +10,35 @@ Few things to notice:
 
 - The `TMB_ID` and `TMB_KEY` correspond to the app id and app key given by the [TMB developer console](https://developer.tmb.cat/).
 - The `GIN_MODE` variable can be `debug` or `release`, depending on wheter you are developing or deploying to production.
+- The `PORT` variable is the port used by gin to run the server. This should be `8080` (hardcoded in the `Dockerfile`). YOu can change it but make sure that it makes sense overall.
 
 The file should be in the root directory and look like this
 
 ```bash
-TMB_ID=xxx
-TMB_KEY=xxx
-GIN_MODE=debug|release
+TMB_ID=${TMB_API_ID}
+TMB_KEY=${TMB_API_KEY}
+GIN_MODE=${debug|release}
+PORT=${PORT}
 ```
 
 ### Build and run
 
-Two options:
+#### Non-docker
 
-1. `go build` and then run the builded executable.
-2. `go run .`
+`go build -o tmb .` and then `./tmb`.
 
-By default the port is `8000` or `8080`, depending on the os. Just look at the fucking terminal.
+or just
 
-### Deploy
+`go run .`
 
-...
 
-### TODO
+#### With docker
 
-Setup docker, *bla, bla, ...*
+1. `docker build -t tmb .`
+2. `docker run -p 8080:8080 --env-file .env tmb:latest` 
+
+
+Then you can begin making requests to `localhost:${PORT}`.
 
 ## Documentation
 
@@ -103,6 +107,18 @@ GET /routines?data=D40,1554,H8,1554,27,1554 HTTP/1.1
 
 *The elapsed times (`data.*.elapsed` and `data.elapsed`) parametere of the response JSON is given in miliseconds.*
 
+### TODO
+
+- [x] Docker
+- [ ] Automatic deployment
+- [ ] Tests
+- [ ] CI/CD
+
+### Deploy
+
+***Note**: Now is being manually deployed to Google Cloud Run via the Google container registry.*
+
 ## Tests
 
 ***Suerte en la vida**, xd*
+
